@@ -5,6 +5,7 @@ from instruction_finder.managers import UserManager
 from django.core.mail import send_mail
 from django.utils.translation import gettext_lazy as _
 
+
 class User(AbstractBaseUser, PermissionsMixin):
     """
     Custom User Model
@@ -17,7 +18,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
 
     # TODO It suppose to be at the UserProfile Model
-    #avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    # avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
 
     is_staff = models.BooleanField(
         _('staff status'),
@@ -45,7 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email
@@ -53,7 +54,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
-
 
     def get_full_name(self):
         '''
