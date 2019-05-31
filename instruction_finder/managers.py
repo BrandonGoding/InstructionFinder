@@ -6,6 +6,7 @@ class UserManager(BaseUserManager):
     UserManager is the object manager to create users and superusers
     It will be used for our custom User model
     """
+    use_in_migrations = True
 
     def _create_user(self, email, password, is_staff, is_superuser, **extra_fields):
         now = timezone.now()

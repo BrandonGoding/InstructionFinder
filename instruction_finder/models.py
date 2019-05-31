@@ -3,6 +3,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from instruction_finder.managers import UserManager
 from django.core.mail import send_mail
+from django.utils.translation import gettext_lazy as _
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
@@ -12,19 +13,47 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(_('email address'), unique=True)
     first_name = models.CharField(_('first name'), max_length=30, blank=True)
-    last_name = models.CharField(_('last name'), max_length=30, blank=True)
+    last_name = models.CharField(_('last name'), max_length=150, blank=True)
     date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
-    is_active = models.BooleanField(_('active'), default=True)
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
-    is_trusty = models.BooleanField(_('trusty'), default=False, help_text=_('Designates whether the user has confirmed his account.'))
+
+    # TODO It suppose to be at the UserProfile Model
+    #avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+
+    is_staff = models.BooleanField(
+        _('staff status'),
+        default=False,
+        help_text=_('Designates whether the user can log into this admin site.'),
+    )
+    is_active = models.BooleanField(
+        _('active'),
+        default=True,
+        help_text=_(
+            'Designates whether this user should be treated as active. '
+            'Unselect this instead of deleting accounts.'
+        ),
+    )
+    is_trusty = models.BooleanField(
+        _('trusty'),
+        default=False,
+        help_text=_(
+            'Designates whether the user has confirmed his account.'
+        )
+    )
+
+    # Object Manager
     objects = UserManager()
 
+    EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['email']
+
+    def __str__(self):
+        return self.email
 
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
+
 
     def get_full_name(self):
         '''
