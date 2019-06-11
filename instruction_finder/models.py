@@ -4,6 +4,7 @@ from django.db import models
 from instruction_finder.managers import UserManager
 from django.core.mail import send_mail
 from django.utils.translation import gettext_lazy as _
+from mongoengine import *
 
 
 class User(AbstractBaseUser, PermissionsMixin):
