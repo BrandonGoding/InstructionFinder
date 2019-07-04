@@ -1,7 +1,9 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils import timezone
 
+
 class UserManager(BaseUserManager):
+
     """
     UserManager is the object manager to create users and superusers
     It will be used for our custom User model

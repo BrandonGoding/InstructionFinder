@@ -2,9 +2,10 @@ from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from instruction_finder.models import User
+from instruction_finder.models import User, Profile
 from django.utils.translation import gettext_lazy as _
 from django.contrib import admin
+
 
 class UserCreationForm(forms.ModelForm):
     """
@@ -74,6 +75,7 @@ class UserChangeForm(forms.ModelForm):
         # field does not have access to the initial value
         return self.initial["password"]
 
+
 class UserAdmin(BaseUserAdmin):
     """
     This class rewrite all the definitions from the default UserAdmin
@@ -97,20 +99,20 @@ class UserAdmin(BaseUserAdmin):
         })
     )
 
-
-
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
             'fields': ('email', 'password1', 'password2')}
-        ),
+         ),
     )
 
     search_fields = ('first_name', 'last_name', 'email')
     ordering = ('email',)
     filter_horizontal = ()
 
+
 # Now register the custom UserAdmin...
 admin.site.register(User, UserAdmin)
+admin.site.register(Profile)
