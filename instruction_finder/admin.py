@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from instruction_finder.models import User, Profile
+from instruction_finder.models import User, Profile, Course
 from django.utils.translation import gettext_lazy as _
 from django.contrib import admin
 
@@ -116,3 +116,4 @@ class UserAdmin(BaseUserAdmin):
 # Now register the custom UserAdmin...
 admin.site.register(User, UserAdmin)
 admin.site.register(Profile)
+admin.site.register(Course)

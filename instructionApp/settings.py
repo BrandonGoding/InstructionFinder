@@ -80,8 +80,7 @@ DATABASES = {
         'NAME': config('MONGODB_NAME'),
         'HOST': config('MONGODB_HOST'),
         'USER': config('MONGODB_USER'),
-        'PASSWORD': config('MONGODB_PASSWD'),
-        'ENFORCE_SCHEMA': True
+        'PASSWORD': config('MONGODB_PASSWD')
     }
 }
 

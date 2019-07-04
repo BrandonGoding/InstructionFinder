@@ -13,7 +13,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     Custom User Model
     This is how we are going to customize fields in the default User Model
     """
-
     email = models.EmailField(_('email address'), unique=True)
     first_name = models.CharField(_('first name'), max_length=30, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
@@ -73,8 +72,17 @@ class Profile(models.Model):
     """
     User Profile Model
     """
+    PROFILE_TYPES = [
+        ('student', 'Student'),
+        ('instructor', 'Instructor'),
+        ('admin', 'Administration'),
+    ]
+
+    profile_type = models.CharField(max_length=15, choices=PROFILE_TYPES)
     user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name='user_profile')
+        User,
+        on_delete=models.CASCADE,
+        related_name='user_profile')
     avatar = models.ImageField(
         null=True,
         blank=True,
@@ -84,3 +92,33 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"Profile of {self.user}"
+
+
+class Session(models.Model):
+    """
+    Session Model
+    """
+    session_date_time = models.DateTimeField()
+    session_length = models.IntegerField()
+    session_price = models.DecimalField(
+        decimal_places=2,
+        max_digits=8,
+        default='00.00')
+
+    class Meta:
+        abstract = True
+
+
+class Course(models.Model):
+    """
+    Course Model
+    """
+    instructor = models.ForeignKey(User, on_delete=models.PROTECT)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+
+    # Embedded Sessions
+    sessions = models.EmbeddedModelField(model_container=Session)
+
+    def __str__(self):
+        return self.title
