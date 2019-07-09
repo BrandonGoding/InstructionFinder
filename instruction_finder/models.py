@@ -1,12 +1,11 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
-from djongo import models
+from django.db import models
 from instruction_finder.managers import UserManager
 from django.core.mail import send_mail
 from django.utils.translation import gettext_lazy as _
 from instruction_finder.helpers import RandomFileName
 from mongoengine import *
-
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
@@ -90,35 +89,7 @@ class Profile(models.Model):
     )
     date_of_birth = models.DateField(null=True, blank=True)
 
+
     def __str__(self):
         return f"Profile of {self.user}"
 
-
-class Session(models.Model):
-    """
-    Session Model
-    """
-    session_date_time = models.DateTimeField()
-    session_length = models.IntegerField()
-    session_price = models.DecimalField(
-        decimal_places=2,
-        max_digits=8,
-        default='00.00')
-
-    class Meta:
-        abstract = True
-
-
-class Course(models.Model):
-    """
-    Course Model
-    """
-    instructor = models.ForeignKey(User, on_delete=models.PROTECT)
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-
-    # Embedded Sessions
-    sessions = models.EmbeddedModelField(model_container=Session)
-
-    def __str__(self):
-        return self.title

@@ -76,13 +76,18 @@ WSGI_APPLICATION = 'instructionApp.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': config('MONGODB_NAME'),
-        'HOST': config('MONGODB_HOST'),
-        'USER': config('MONGODB_USER'),
-        'PASSWORD': config('MONGODB_PASSWD')
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_NAME'),
+        'USER': config('POSTGRES_USER'),
+        'PASSWORD': config('POSTGRES_PWD'),
+        'HOST': config('POSTGRES_HOST'),
+        'PORT': config('POSTGRES_PORT', '5432'),
     }
 }
+
+MONGODB_NAME = config('MONGODB_NAME')
+MONGODB_USER = config('MONGODB_USER')
+MONGODB_PWD = config('MONGODB_PWD')
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
