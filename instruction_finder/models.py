@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from instruction_finder.helpers import RandomFileName
 from mongoengine import *
 
+
 class User(AbstractBaseUser, PermissionsMixin):
     """
     Custom User Model
@@ -90,7 +91,6 @@ class Profile(models.Model):
     )
     date_of_birth = models.DateField(null=True, blank=True)
 
-
     def __str__(self):
         return f"Profile of {self.user}"
 
@@ -108,4 +108,3 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
-

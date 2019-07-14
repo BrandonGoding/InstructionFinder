@@ -6,8 +6,6 @@ from instruction_finder.models import User, Profile, Course
 from django.utils.translation import gettext_lazy as _
 from django.contrib import admin
 
-from instruction_finder.mongo_models import Session
-
 
 class UserCreationForm(forms.ModelForm):
     """

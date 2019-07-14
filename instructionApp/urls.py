@@ -14,7 +14,10 @@ urlpatterns = [
 
     # API
 
-    path('courses/', CourseViewSet.as_view({'get': 'list'}), name='courses_list'),
-    path('courses/<int:pk>/', CourseViewSet.as_view({'get': 'retrieve'}), name='courses_create'),
-    path('courses/', CourseViewSet.as_view({'post': 'create'}), name='courses_create'),
+    path('courses/',
+         CourseViewSet.as_view({'get': 'list'}), name='courses_list'),
+    path('courses/<int:pk>/',
+         CourseViewSet.as_view({'get': 'retrieve'}), name='courses_create'),
+    path('courses/',
+         CourseViewSet.as_view({'post': 'create'}), name='courses_create'),
 ]

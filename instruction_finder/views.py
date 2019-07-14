@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.views import View
 from django.http import JsonResponse
 from instruction_finder.mongo_models import Session, Seat
@@ -9,7 +8,8 @@ from instruction_finder.models import Course, User, Profile
 
 # Testing CREATE models
 class TestCourseView(View):
-    def get(self, request, *args, **kwargs):
+    @staticmethod
+    def get():
         # Create Instructor
         rand = random.randint(0, 1000)
         instructor = User.objects.create_user(email=f'instructor{rand}@gmail.com',
@@ -36,7 +36,8 @@ class TestCourseView(View):
         session.course_id = course.id
         session.course_title = course.title
         session.instructor_id = instructor.id
-        session.instructor_name = instructor.get_full_name() if instructor.get_full_name() else instructor.get_username()
+        session.instructor_name = instructor.get_full_name(
+        ) if instructor.get_full_name() else instructor.get_username()
         session.session_date = datetime.datetime(2019, 8, 1)
         session.session_minutes_length = 120
         session.session_price = 45.98
@@ -45,7 +46,8 @@ class TestCourseView(View):
         # Create seats
         seat = Seat()
         seat.student_id = student.id
-        seat.student_name = student.get_full_name() if student.get_full_name() else student.get_username()
+        seat.student_name = student.get_full_name(
+        ) if student.get_full_name() else student.get_username()
         seat.amount_paid = 45.98
         seat.date_paid = datetime.datetime(2019, 7, 1)
 

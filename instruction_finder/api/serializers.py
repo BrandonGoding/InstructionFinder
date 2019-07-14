@@ -7,5 +7,4 @@ class CourseSerializer(ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'instructor', 'title', 'description','is_active')
-
+        fields = ('id', 'instructor', 'title', 'description', 'is_active')

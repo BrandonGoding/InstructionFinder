@@ -1,14 +1,15 @@
 import datetime
 import mongoengine
-from instructionApp.settings import MONGODB_NAME, MONGODB_USER,MONGODB_PWD
-
 
 # All models in this file are handled by Mongo
+
+
 class Seat(mongoengine.EmbeddedDocument):
     student_id = mongoengine.IntField(required=True)
     student_name = mongoengine.StringField()
     amount_paid = mongoengine.FloatField()
     date_paid = mongoengine.DateTimeField(default=datetime.datetime.now)
+
 
 class Session(mongoengine.Document):
     course_id = mongoengine.IntField(required=True)
@@ -25,5 +26,5 @@ class Session(mongoengine.Document):
     seats = mongoengine.EmbeddedDocumentListField(Seat)
 
     def save(self, *args, **kwargs):
-        self.modified_date = datetime.datetime.now()
+        self.updated_at = datetime.datetime.now()
         return super(Session, self).save(*args, **kwargs)
