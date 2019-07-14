@@ -70,6 +70,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Profile(models.Model):
     """
     User Profile Model
+    To store additional user fields
     """
     PROFILE_TYPES = [
         ('student', 'Student'),
@@ -92,4 +93,19 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"Profile of {self.user}"
+
+
+class Course(models.Model):
+    """
+    Course Model
+    """
+    instructor = models.ForeignKey(User, on_delete=models.PROTECT)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
 
