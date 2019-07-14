@@ -52,7 +52,7 @@ class TestCourseView(View):
         # Link seat to the session seats
         session.seats.append(seat)
         session.save()
-        
+
         return JsonResponse(
             {
                 "ok": "test",
