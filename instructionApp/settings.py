@@ -88,6 +88,10 @@ DATABASES = {
 MONGODB_NAME = config('MONGODB_NAME')
 MONGODB_USER = config('MONGODB_USER')
 MONGODB_PWD = config('MONGODB_PWD')
+mongoengine.connect(MONGODB_NAME,
+                    username=MONGODB_USER,
+                    password=MONGODB_PWD,
+                    authentication_source='admin')
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -122,6 +126,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'instruction_finder.User'

@@ -3,6 +3,8 @@ Django==2.2.1
 django-split-settings==0.3.0
 djongo==1.2.32
 mongoengine==0.17.0
+Pillow==6.1.0
+psycopg2==2.8.3
 pymongo==3.8.0
 python-decouple==3.1
 pytz==2019.1

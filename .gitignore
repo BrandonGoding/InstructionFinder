@@ -5,3 +5,4 @@ db.sqlite3
 instructionApp/__pycache__/*
 instruction_finder/migrations/*
 *.pyc
+media
