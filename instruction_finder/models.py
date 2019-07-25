@@ -102,7 +102,7 @@ class Course(models.Model):
     instructor = models.ForeignKey(User, on_delete=models.PROTECT)
     title = models.CharField(max_length=200)
     description = models.TextField()
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

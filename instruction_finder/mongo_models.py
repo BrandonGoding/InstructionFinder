@@ -51,7 +51,7 @@ class Slot(mongoengine.EmbeddedDocument):
     hour = mongoengine.StringField(required=True, unique=True)
     is_active = mongoengine.BooleanField(required=True,default=False)
 
-class SlotGroup(mongoengine.EmbeddedDocument):
+class SlotGroup(mongoengine.Document):
 
     """
     The Instructor Can create different Slot Groups
@@ -73,4 +73,4 @@ class AvailableDay(mongoengine.Document):
     """
     instructor_id = mongoengine.IntField(required=True)
     day = mongoengine.DateField(required=True)
-    slot_groups = mongoengine.EmbeddedDocumentListField(SlotGroup)
+    slot_group_ids = mongoengine.ListField()
