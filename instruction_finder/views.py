@@ -90,5 +90,5 @@ class SessionViewSet(View):
             }, status=401)
 
         # Serialize objects
-        sessions = Session.objects.all()
+        sessions = Session.objects.all().order_by('-session_date')[:20]
         return JsonResponse(json.loads(sessions.to_json()), status=200, safe=False)
