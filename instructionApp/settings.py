@@ -138,9 +138,12 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
-    'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=259200),  # 3 days
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(seconds=259200),  # 3 days
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer', # Bearer token
+    'JWT_ALLOW_REFRESH': True, # Allow Refresh
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
 }
 
 # Static files (CSS, JavaScript, Images)
