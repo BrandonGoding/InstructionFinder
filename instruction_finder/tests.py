@@ -2,8 +2,8 @@ from django.test import TestCase
 from model_mommy import mommy
 import mongoengine
 import datetime
-from instruction_finder.models import User, Profile, Course
-from instruction_finder.mongo_models import Session, Seat, AvailableDay, SlotGroup, Slot
+from instruction_finder.models import User, Profile, Course, Session, Seat
+from instruction_finder.mongo_models import AvailableDay, SlotGroup, Slot
 
 
 class TestUsers(TestCase):
@@ -51,61 +51,45 @@ class TestCourseAndSessions(TestCase):
         # Connect with mongomock for testing
         self.conn = mongoengine.connect('testdb', host='mongomock://localhost')
 
-
         self.instructor = mommy.make(User,
                                      email='instructor789@inst.com')
         self.instructor_profile = mommy.make(Profile,
                                              user=self.instructor,
                                              profile_type='instructor')
 
-        self.student = mommy.make(User,
-                                     email='student789@inst.com')
-        self.student_profile = mommy.make(Profile,
-                                             user=self.student,
-                                             profile_type='student')
-
         self.course = mommy.make(Course,
                                  instructor=self.instructor,
                                  title='Tennis Lessons')
 
-        # Create a Session
-        session = Session()
-        session.course_id = self.course.id
-        session.course_title = self.course.title
-        session.instructor_id = self.instructor.id
-        session.instructor_name = self.instructor.get_full_name(
-        ) if self.instructor.get_full_name() else self.instructor.get_username()
-        session.session_date = datetime.datetime(2019, 8, 1)
-        session.session_minutes_length = 120
-        session.session_price = 45.98
-        session.session_currency = 'us-dollar'
-        session.save()
-        self.session = session
+        # Create a session
+        self.session = mommy.make(Session,
+                                  course=self.course,
+                                  date=datetime.datetime(2019, 8, 1),
+                                  minutes_length=60,
+                                  price=25.93)
 
-
-        # Create 10 seats in section
+        # Create 10 seats for 10 students in the section
         for i in range(1, 11):
-            seat = Seat()
-            seat.student_id = self.student.id
-            seat.student_name =  self.student.get_full_name(
-            ) if  self.student.get_full_name() else  self.student.get_username()
-            seat.amount_paid = 45.98
-            seat.date_paid = datetime.datetime(2019, 7, i)
+            # Create some student
+            student = mommy.make(User, email=f'student{i}@inst.com')
+            mommy.make(Profile,
+                       user=student,
+                       profile_type='student')
 
-            # Link seat to the session seats
-            self.session.seats.append(seat)
-            self.session.save()
+            # Create a seat
+            self.seat = mommy.make(Seat,
+                       session=self.session,
+                       student=student,
+                       amount_paid=25.93,
+                       status='confirmed')
 
 
         # Create 2 slot groups
         group_a = SlotGroup()
         group_a.group_name = 'Morning'
 
-
         group_b = SlotGroup()
         group_b.group_name = 'Night'
-
-
 
         # Create the slot hours inside the groups
         group_a.slots.append(Slot(hour='08:00'))
@@ -125,9 +109,6 @@ class TestCourseAndSessions(TestCase):
             available_day.slot_group_ids.append(group_b.id)
             available_day.save()
 
-
-
-
     def tearDown(self):
         # Drop test DB and close connection
         self.conn.drop_database('testdb')
@@ -136,7 +117,6 @@ class TestCourseAndSessions(TestCase):
     def test_course_creation(self):
         self.assertTrue(isinstance(self.course, Course))
         self.assertEqual(self.course.instructor.id, self.instructor.id)
-
 
     def test_session_creation(self):
         self.assertTrue(isinstance(self.session, Session))
@@ -148,5 +128,7 @@ class TestCourseAndSessions(TestCase):
         # Assert that 10 seats has been created on the session
         self.assertEqual(self.session.seats.count(), 10)
 
-
+        # Check relations from seat
+        self.assertEqual(self.seat.session.course.instructor.email, 'instructor789@inst.com')
+        self.assertEqual(self.seat.session.course.title, 'Tennis Lessons')
 

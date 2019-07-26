@@ -1,6 +1,8 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+from localflavor.us.models import USStateField
+
 from instruction_finder.managers import UserManager
 from django.core.mail import send_mail
 from django.utils.translation import gettext_lazy as _
@@ -108,3 +110,47 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Session(models.Model):
+    """
+    Session Model
+    """
+    course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name='sessions')
+    date = models.DateTimeField(unique=True)
+    minutes_length = models.IntegerField()
+    price = models.DecimalField(decimal_places=2, max_digits=12)
+    currency = models.CharField(max_length=3, default='USD')
+
+    address = models.CharField(max_length=200, null=True, blank=True)
+    city = models.CharField(max_length=45, null=True, blank=True)
+    state = USStateField(null=True, blank=True)
+    zip_code = models.CharField(max_length=5, null=True, blank=True)
+    lat = DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    long = DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Seat(models.Model):
+    """
+    Seat Model
+    """
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('missed', 'Missed'),
+        ('re-scheduled', 'Re-Scheduled'),
+        ('canceled', 'Canceled'),
+        ('confirmed', 'Confirmed'),
+        ('completed', 'Completed'),
+    )
+
+    session = models.ForeignKey(
+        Session, on_delete=models.PROTECT, related_name='seats')
+    student = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name='seats')
+    amount_paid = models.DecimalField(
+        decimal_places=2, max_digits=12, default=0.00)
+    date_paid = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=20,choices=STATUS_CHOICES, default='pending')

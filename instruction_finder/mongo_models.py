@@ -3,7 +3,10 @@ import mongoengine
 
 # All models in this file are handled by Mongo
 
-
+# I moved those models to postgres because they are actually structured data
+# I think mongo should handle non-structured and non-related data
+# Something like notifications that are volatile date
+"""
 class Seat(mongoengine.EmbeddedDocument):
     student_id = mongoengine.IntField(required=True)
     student_name = mongoengine.StringField()
@@ -28,7 +31,7 @@ class Session(mongoengine.Document):
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()
         return super(Session, self).save(*args, **kwargs)
-
+"""
 class Slot(mongoengine.EmbeddedDocument):
     """
     Slots Model

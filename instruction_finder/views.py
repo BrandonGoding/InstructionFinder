@@ -1,5 +1,5 @@
 from django.views import View
-from instruction_finder.mongo_models import Session, Seat
+# from instruction_finder.mongo_models import Session, Seat
 import random
 import datetime
 from instruction_finder.models import Course, User, Profile
@@ -7,7 +7,6 @@ import json
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from django.http import JsonResponse
-
 
 
 class SessionViewSet(View):
@@ -33,5 +32,6 @@ class SessionViewSet(View):
             }, status=401)
 
         # Serialize objects
-        sessions = Session.objects.all().order_by('-session_date')[:20]
-        return JsonResponse(json.loads(sessions.to_json()), status=200, safe=False)
+        # sessions = Session.objects.all().order_by('-session_date')[:20]
+        # return JsonResponse(json.loads(sessions.to_json()), status=200, safe=False)
+        return JsonResponse({"ok": "ok"}, status=200, safe=False)

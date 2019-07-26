@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'instruction_finder.apps.InstructionFinderConfig',
+    'localflavor',
     'rest_framework',
+
 ]
 
 MIDDLEWARE = [
