@@ -3,7 +3,7 @@ from model_mommy import mommy
 import mongoengine
 import datetime
 from instruction_finder.models import User, Profile, Course, Session, Seat
-from instruction_finder.mongo_models import AvailableDay, SlotGroup, Slot
+from instruction_finder.mongo_models import SlotGroup, Slot
 
 
 class TestUsers(TestCase):
@@ -64,7 +64,6 @@ class TestCourseAndSessions(TestCase):
         # Create a session
         self.session = mommy.make(Session,
                                   course=self.course,
-                                  date=datetime.datetime(2019, 8, 1),
                                   minutes_length=60,
                                   price=25.93)
 
@@ -78,36 +77,44 @@ class TestCourseAndSessions(TestCase):
 
             # Create a seat
             self.seat = mommy.make(Seat,
-                       session=self.session,
-                       student=student,
-                       amount_paid=25.93,
-                       status='confirmed')
-
+                                   session=self.session,
+                                   student=student,
+                                   amount_paid=25.93,
+                                   status='confirmed')
 
         # Create 2 slot groups
         group_a = SlotGroup()
         group_a.group_name = 'Morning'
+        group_a.session_id = self.session.id
 
         group_b = SlotGroup()
         group_b.group_name = 'Night'
+        group_b.session_id = self.session.id
 
         # Create the slot hours inside the groups
-        group_a.slots.append(Slot(hour='08:00'))
-        group_a.slots.append(Slot(hour='08:30'))
+        slot_a = Slot(start=datetime.datetime(2019, 8, 1, 10, 0, 0),
+                      end=datetime.datetime(2019, 8, 1, 11, 0, 0),
+                      is_active=True)
+        slot_b = Slot(start=datetime.datetime(2019, 8, 1, 12, 0, 0),
+                      end=datetime.datetime(2019, 8, 1, 13, 0, 0),
+                      is_active=False)
+        slot_c = Slot(start=datetime.datetime(2019, 8, 1, 13, 0, 0),
+                      end=datetime.datetime(2019, 8, 1, 14, 0, 0),
+                      is_active=True)
 
-        group_b.slots.append(Slot(hour='21:00'))
-        group_b.slots.append(Slot(hour='21:30'))
-
+        # Append the slots to Group A
+        group_a.slots.append(slot_a)
         group_a.save()
-        group_b.save()
 
-        for i in range(1, 21):
-            available_day = AvailableDay()
-            available_day.day = datetime.datetime(2019, 8, i)
-            available_day.instructor_id = self.instructor.id
-            available_day.slot_group_ids.append(group_a.id)
-            available_day.slot_group_ids.append(group_b.id)
-            available_day.save()
+        group_a.slots.append(slot_b)
+        group_a.save()
+
+        group_a.slots.append(slot_c)
+        group_a.save()
+
+
+
+        group_b.save()
 
     def tearDown(self):
         # Drop test DB and close connection
@@ -129,6 +136,10 @@ class TestCourseAndSessions(TestCase):
         self.assertEqual(self.session.seats.count(), 10)
 
         # Check relations from seat
-        self.assertEqual(self.seat.session.course.instructor.email, 'instructor789@inst.com')
+        self.assertEqual(
+            self.seat.session.course.instructor.email, 'instructor789@inst.com')
         self.assertEqual(self.seat.session.course.title, 'Tennis Lessons')
 
+        # Assert number of slot groups for the instructor
+        self.assertEqual(SlotGroup.objects.filter(
+            session_id=self.session.id).count(), 2)

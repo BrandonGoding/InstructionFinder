@@ -117,7 +117,6 @@ class Session(models.Model):
     Session Model
     """
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name='sessions')
-    date = models.DateTimeField(unique=True)
     minutes_length = models.IntegerField()
     price = models.DecimalField(decimal_places=2, max_digits=12)
     currency = models.CharField(max_length=3, default='USD')
@@ -154,3 +153,4 @@ class Seat(models.Model):
         decimal_places=2, max_digits=12, default=0.00)
     date_paid = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=20,choices=STATUS_CHOICES, default='pending')
+
