@@ -43,7 +43,32 @@ class SlotGroup(mongoengine.Document):
     }
     """
     session_id = mongoengine.IntField(required=True)
-    group_name = mongoengine.StringField()
+    group_name = mongoengine.StringField(required=True)
     slots = mongoengine.EmbeddedDocumentListField(Slot)
     created_at = mongoengine.DateTimeField(default=datetime.datetime.now)
     updated_at = mongoengine.DateTimeField(default=datetime.datetime.now)
+
+
+class Tag(mongoengine.EmbeddedDocument):
+    tag = mongoengine.StringField(required=True)
+
+
+class CourseTags(mongoengine.Document):
+    """
+    Course Tags will be used in the Courses Finder Page
+    In order to perform a tag query operation
+
+    e.g.
+    {
+        course_id: 100,
+        tags : [
+                "tennis",
+                "beginners",
+                "night",
+                "maine"
+               ],
+    }
+
+    """
+    course_id = mongoengine.IntField(required=True)
+    tags = mongoengine.EmbeddedDocumentListField(Tag)
