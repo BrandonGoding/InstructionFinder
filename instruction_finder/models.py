@@ -1,13 +1,17 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
-from django.db import models
-from localflavor.us.models import USStateField
-from instruction_finder.mongo_models import CourseAttributes
-from instruction_finder.managers import UserManager
 from django.core.mail import send_mail
+from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
-from instruction_finder.helpers import RandomFileName
+from localflavor.us.models import USStateField
 from mongoengine import *
+
+from instruction_finder.helpers import RandomFileName
+from instruction_finder.managers import UserManager
+from instruction_finder.mongo_models import CourseAttributes
+
 
 """
     TODO:
@@ -64,6 +68,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
     class Meta:
+        """
+        Meta
+        """
         verbose_name = _("user")
         verbose_name_plural = _("users")
 
@@ -136,9 +143,10 @@ class Course(models.Model):
     def __str__(self):
         return self.title
 
-    def create_course_attributes(self):
+    
+    def create_course_attributes_object(self):
         course_attributes = CourseAttributes()
-        course_attributes.course_id = self.id
+        course_attributes.course_id = self.pk
         course_attributes.course_title = self.title
         course_attributes.course_description = self.description
         course_attributes.is_active = self.is_active
@@ -182,8 +190,7 @@ class Session(models.Model):
         null=True,
         blank=True,
         verbose_name=_("Latitude"),
-    )
-    
+    )    
     long = DecimalField(
         max_digits=9,
         decimal_places=6,
@@ -235,3 +242,7 @@ class Seat(models.Model):
         verbose_name=_("Status"),
     )
 
+@receiver(pre_save, sender=Course)
+def create_course_attributes_object(sender, course, created, **kwargs):
+    if created:
+        course.create_course_attributes_object()

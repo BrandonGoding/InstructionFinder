@@ -1,9 +1,11 @@
+import datetime
+
+import mongoengine
 from django.test import TestCase
 from model_mommy import mommy
-import mongoengine
-import datetime
-from instruction_finder.models import User, Profile, Course, Session, Seat
-from instruction_finder.mongo_models import SlotGroup, Slot
+
+from instruction_finder.models import Course, Profile, Seat, Session, User
+from instruction_finder.mongo_models import Slot, SlotGroup
 
 
 class TestUsers(TestCase):
@@ -30,6 +32,9 @@ class TestUserProfile(TestCase):
         self.user_profile = mommy.make(Profile, user=self.user, profile_type="student")
 
     def test_user_profile_creation(self):
+        """
+        Test UserProfile Model creation
+        """
         self.assertTrue(isinstance(self.user_profile, Profile))
         self.assertEqual(self.user_profile.profile_type, "student")
         self.assertEqual(self.user_profile.user.email, "user456@inst.com")
