@@ -12,12 +12,11 @@ class TestUsers(TestCase):
     """
 
     def setUp(self):
-        self.user = mommy.make(User,
-                               email='user123@inst.com')
+        self.user = mommy.make(User, email="user123@inst.com")
 
     def test_users_creation(self):
         self.assertTrue(isinstance(self.user, User))
-        self.assertEqual(self.user.email, 'user123@inst.com')
+        self.assertEqual(self.user.email, "user123@inst.com")
 
 
 class TestUserProfile(TestCase):
@@ -26,17 +25,14 @@ class TestUserProfile(TestCase):
     """
 
     def setUp(self):
-        self.user = mommy.make(User,
-                               email='user456@inst.com')
+        self.user = mommy.make(User, email="user456@inst.com")
 
-        self.user_profile = mommy.make(Profile,
-                                       user=self.user,
-                                       profile_type='student')
+        self.user_profile = mommy.make(Profile, user=self.user, profile_type="student")
 
     def test_user_profile_creation(self):
         self.assertTrue(isinstance(self.user_profile, Profile))
-        self.assertEqual(self.user_profile.profile_type, 'student')
-        self.assertEqual(self.user_profile.user.email, 'user456@inst.com')
+        self.assertEqual(self.user_profile.profile_type, "student")
+        self.assertEqual(self.user_profile.user.email, "user456@inst.com")
 
 
 class TestCourseAndSessions(TestCase):
@@ -49,58 +45,62 @@ class TestCourseAndSessions(TestCase):
         mongoengine.connection.disconnect()
 
         # Connect with mongomock for testing
-        self.conn = mongoengine.connect('testdb', host='mongomock://localhost')
+        self.conn = mongoengine.connect("testdb", host="mongomock://localhost")
 
-        self.instructor = mommy.make(User,
-                                     email='instructor789@inst.com')
-        self.instructor_profile = mommy.make(Profile,
-                                             user=self.instructor,
-                                             profile_type='instructor')
+        self.instructor = mommy.make(User, email="instructor789@inst.com")
+        self.instructor_profile = mommy.make(
+            Profile, user=self.instructor, profile_type="instructor"
+        )
 
-        self.course = mommy.make(Course,
-                                 instructor=self.instructor,
-                                 title='Tennis Lessons')
+        self.course = mommy.make(
+            Course, instructor=self.instructor
+        )
 
         # Create a session
-        self.session = mommy.make(Session,
-                                  course=self.course,
-                                  minutes_length=60,
-                                  price=25.93)
+        self.session = mommy.make(
+            Session, course=self.course, minutes_length=60, price=25.93
+        )
 
         # Create 10 seats for 10 students in the section
         for i in range(1, 11):
             # Create some student
-            student = mommy.make(User, email=f'student{i}@inst.com')
-            mommy.make(Profile,
-                       user=student,
-                       profile_type='student')
+            student = mommy.make(User, email=f"student{i}@inst.com")
+            mommy.make(Profile, user=student, profile_type="student")
 
             # Create a seat
-            self.seat = mommy.make(Seat,
-                                   session=self.session,
-                                   student=student,
-                                   amount_paid=25.93,
-                                   status='confirmed')
+            self.seat = mommy.make(
+                Seat,
+                session=self.session,
+                student=student,
+                amount_paid=25.93,
+                status="confirmed",
+            )
 
         # Create 2 slot groups
         group_a = SlotGroup()
-        group_a.group_name = 'Morning'
+        group_a.group_name = "Morning"
         group_a.session_id = self.session.id
 
         group_b = SlotGroup()
-        group_b.group_name = 'Night'
+        group_b.group_name = "Night"
         group_b.session_id = self.session.id
 
         # Create the slot hours inside the groups
-        slot_a = Slot(start=datetime.datetime(2019, 8, 1, 10, 0, 0),
-                      end=datetime.datetime(2019, 8, 1, 11, 0, 0),
-                      is_active=True)
-        slot_b = Slot(start=datetime.datetime(2019, 8, 1, 12, 0, 0),
-                      end=datetime.datetime(2019, 8, 1, 13, 0, 0),
-                      is_active=False)
-        slot_c = Slot(start=datetime.datetime(2019, 8, 1, 13, 0, 0),
-                      end=datetime.datetime(2019, 8, 1, 14, 0, 0),
-                      is_active=True)
+        slot_a = Slot(
+            start=datetime.datetime(2019, 8, 1, 10, 0, 0),
+            end=datetime.datetime(2019, 8, 1, 11, 0, 0),
+            is_active=True,
+        )
+        slot_b = Slot(
+            start=datetime.datetime(2019, 8, 1, 12, 0, 0),
+            end=datetime.datetime(2019, 8, 1, 13, 0, 0),
+            is_active=False,
+        )
+        slot_c = Slot(
+            start=datetime.datetime(2019, 8, 1, 13, 0, 0),
+            end=datetime.datetime(2019, 8, 1, 14, 0, 0),
+            is_active=True,
+        )
 
         # Append the slots to Group A
         group_a.slots.append(slot_a)
@@ -112,13 +112,11 @@ class TestCourseAndSessions(TestCase):
         group_a.slots.append(slot_c)
         group_a.save()
 
-
-
         group_b.save()
 
     def tearDown(self):
         # Drop test DB and close connection
-        self.conn.drop_database('testdb')
+        self.conn.drop_database("testdb")
         self.conn.close()
 
     def test_course_creation(self):
@@ -137,9 +135,11 @@ class TestCourseAndSessions(TestCase):
 
         # Check relations from seat
         self.assertEqual(
-            self.seat.session.course.instructor.email, 'instructor789@inst.com')
-        self.assertEqual(self.seat.session.course.title, 'Tennis Lessons')
+            self.seat.session.course.instructor.email, "instructor789@inst.com"
+        )
+        self.assertEqual(self.seat.session.course.title, "Tennis Lessons")
 
         # Assert number of slot groups for the instructor
-        self.assertEqual(SlotGroup.objects.filter(
-            session_id=self.session.id).count(), 2)
+        self.assertEqual(
+            SlotGroup.objects.filter(session_id=self.session.id).count(), 2
+        )
