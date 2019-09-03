@@ -1,3 +1,20 @@
+"""
+Authors:  Robert Marinho & Brandon Goding
+
+This module declares the models for the instruction_finder APP.
+
+Todo:
+    * Review models.py and think of any methods that may be useful <-- Both of us
+    * Review  https://docs.djangoproject.com/en/2.2/topics/i18n/translation/  <-- Brandon
+    * Create class Student extends User        <-- Brandon Will DO
+    * Create class Instructor extends User     <-- Brandon Will Do
+    * Create class Administrator extends User  <-- Brandon Will Do
+    * Create methods  for classes above        <-- Brandon Will Do Robert will review an test
+    * Finish CourseAttribute class             <-- Robert Will Do
+    * GOAT Test                                <-- Robert Will Do
+    * COURSE RATING MODELS
+
+"""
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.core.mail import send_mail
@@ -7,24 +24,10 @@ from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from localflavor.us.models import USStateField
 from mongoengine import *
-
 from instruction_finder.helpers import RandomFileName
 from instruction_finder.managers import UserManager
 from instruction_finder.mongo_models import CourseAttributes
-
-
-"""
-    TODO:
-        Review models.py and think of any methods that may be useful <-- Both of us
-        Review  https://docs.djangoproject.com/en/2.2/topics/i18n/translation/  <-- Brandon
-        Create class Student extends User        <-- Brandon Will DO
-        Create class Instructor extends User     <-- Brandon Will Do
-        Create class Administrator extends User  <-- Brandon Will Do
-        Create methods  for classes above        <-- Brandon Will Do Robert will review an test
-        Finish CourseAttribute class             <-- Robert Will Do
-        GOAT Test                                <-- Robert Will Do
-
-"""
+from datetime import datetime
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -32,16 +35,30 @@ class User(AbstractBaseUser, PermissionsMixin):
     Custom User Model
     This is how we are going to customize fields in the default User Model
     """
-
-    email = models.EmailField(_("email address"), unique=True)
-    first_name = models.CharField(_("first name"), max_length=30, blank=True)
-    last_name = models.CharField(_("last name"), max_length=150, blank=True)
-    date_joined = models.DateTimeField(_("date joined"), auto_now_add=True)
-
+    email = models.EmailField(
+        _("email address"),
+        unique=True,
+        help_text=_("Please enter a valid email address, this will also be your user name."),
+    )
+    first_name = models.CharField(
+        _("first name"),
+        max_length=30,
+        blank=True,
+        help_text=_("Please enter your given name."),
+    )
+    last_name = models.CharField(
+        _("last name"),
+        max_length=150,
+        blank=True,
+        help_text=_("Please enter your family name."),
+    )
+    date_joined = models.DateTimeField(
+        _("date joined"),
+        auto_now_add=True,
+    )
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
-        help_text=_("Designates whether the user can log into this admin site."),
     )
     is_active = models.BooleanField(
         _("active"),
@@ -65,6 +82,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     def __str__(self):
+        """
+        Returns the users email address
+        :return:
+        String: self.email
+        """
         return self.email
 
     class Meta:
@@ -74,16 +96,33 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = _("user")
         verbose_name_plural = _("users")
 
-    def get_full_name(self):
-        # Returns the first_name plus the last_name, with a space in between.
-        full_name = "%s %s" % (self.first_name, self.last_name)
-        return full_name.strip()
+    @property
+    def full_name(self):
+        """
+        Returns the full name of the user
+        :return:
+        String: self.first_name self.last_name
+        """
+        return f"{self.first_name} {self.last_name}".strip()
 
-    def get_short_name(self):
-        # Returns the short name for the user.
+    @property
+    def short_name(self):
+        """
+        Returns the short display name for the rider ie The First Name
+        :return:
+        String: Returns the short name for the user.
+        """
         return self.first_name
 
     def email_user(self, subject, message, from_email=None, **kwargs):
+        """
+        :param subject:
+        :param message:
+        :param from_email:
+        :param kwargs:
+        :return:
+        int: number of successful messages (0 or 1)
+        """
         # Sends an email to this User.
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
@@ -93,16 +132,8 @@ class Profile(models.Model):
     User Profile Model
     To store additional user fields
     """
-
-    PROFILE_TYPES = [
-        ("student", "Student"),
-        ("instructor", "Instructor"),
-        ("admin", "Administration"),
-    ]
-
-    profile_type = models.CharField(max_length=15, choices=PROFILE_TYPES)
     user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="user_profile"
+        to=User, on_delete=models.CASCADE, related_name="user_profile"
     )
     avatar = models.ImageField(
         null=True, blank=True, upload_to=RandomFileName("user_profile")
@@ -110,15 +141,78 @@ class Profile(models.Model):
     date_of_birth = models.DateField(null=True, blank=True)
 
     def __str__(self):
+        """
+        Returns the email address of the profiles User
+        :return:
+        String: self.user
+        """
         return f"Profile of {self.user}"
+
+    @property
+    def full_name(self):
+        return self.user.full_name
+
+
+class Instructor(Profile):
+    title = models.CharField(
+        max_length=25,
+        null=True,
+        blank=True,
+        verbose_name="Instructor Title",
+        help_text="Enter your professional title here, examples Coach, Professor, Master"
+    )
+
+    def __str__(self):
+        """
+        Returns the full name of the Instructor
+        :return:
+        String full_name
+        """
+        return self.full_name
+
+    @property
+    def average_rating(self):
+        """
+        Return the average rateing calculated by total review score / count of reviews
+        :return:
+        int:
+        """
+        # TODO: FINISH THIS METHOD
+        pass
+
+    @property
+    def courses_taught(self):
+        """
+        Returns the total number of courses taught on this app
+        :return:
+        int:
+        """
+        pass  # TODO: FINISH THIS METHOD
+
+    def get_upcoming_courses(self):
+        """
+        Returns a list of upcoming class objects
+        :return:
+        List:
+        """
+        return Course.objects.filter(user=self.user.pk)  #TODO: NEED TO ALSO FILTER BY DATE
+
+
+class Student(Profile):
+
+    def __str__(self):
+        """
+        Returns the full name of the Student
+        :return:
+        String full_name
+        """
+        return self.full_name
 
 
 class Course(models.Model):
-
     """
     Course Model
     """
-
     instructor = models.ForeignKey(
         User,
         on_delete=models.PROTECT,
@@ -141,16 +235,32 @@ class Course(models.Model):
     course_attributes_id = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
+        """
+        Returns the title of the course
+        :return:
+        String: title
+        """
         return self.title
 
-    
     def create_course_attributes_object(self):
+        """
+        :return: None
+        """
         course_attributes = CourseAttributes()
         course_attributes.course_id = self.pk
         course_attributes.course_title = self.title
         course_attributes.course_description = self.description
         course_attributes.is_active = self.is_active
         course_attributes.save()
+
+    @property
+    def upcoming(self):
+        """
+        Returns True if course has availability in upcoming session dates.
+        :return:
+        bool
+        """
+        pass
 
 
 class Session(models.Model):
@@ -173,7 +283,6 @@ class Session(models.Model):
         verbose_name=_("Session Price"),
     )
     currency = models.CharField(max_length=3, default="USD", verbose_name=_("Currency"))
-    #  I DIDN'T DO VERBOSE NAME BECAUSE I FIGURED CITY WOULD BE CITY, but do you think I should for translations?
     address = models.CharField(
         max_length=200, null=True, blank=True, verbose_name=_("Address")
     )
@@ -190,7 +299,7 @@ class Session(models.Model):
         null=True,
         blank=True,
         verbose_name=_("Latitude"),
-    )    
+    )
     long = DecimalField(
         max_digits=9,
         decimal_places=6,
@@ -241,6 +350,7 @@ class Seat(models.Model):
         default="pending",
         verbose_name=_("Status"),
     )
+
 
 @receiver(pre_save, sender=Course)
 def create_course_attributes_object(sender, course, created, **kwargs):
