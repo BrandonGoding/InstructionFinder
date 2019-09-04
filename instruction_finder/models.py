@@ -1,17 +1,15 @@
+""" Models """
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from localflavor.us.models import USStateField
-from mongoengine import *
 
 from instruction_finder.helpers import RandomFileName
 from instruction_finder.managers import UserManager
 from instruction_finder.mongo_models import CourseAttributes
-
 
 """
     TODO:
@@ -71,20 +69,21 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Meta
         """
+
         verbose_name = _("user")
         verbose_name_plural = _("users")
 
     def get_full_name(self):
-        # Returns the first_name plus the last_name, with a space in between.
+        """ Returns the first_name plus the last_name, with a space in between."""
         full_name = "%s %s" % (self.first_name, self.last_name)
         return full_name.strip()
 
     def get_short_name(self):
-        # Returns the short name for the user.
+        """ Returns the short name for the user. """
         return self.first_name
 
     def email_user(self, subject, message, from_email=None, **kwargs):
-        # Sends an email to this User.
+        """ Sends an email to this User. """
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
 
@@ -114,7 +113,6 @@ class Profile(models.Model):
 
 
 class Course(models.Model):
-
     """
     Course Model
     """
@@ -143,8 +141,8 @@ class Course(models.Model):
     def __str__(self):
         return self.title
 
-    
     def create_course_attributes_object(self):
+        """ Create course attributes in mongo DB (Will be used in the query)"""
         course_attributes = CourseAttributes()
         course_attributes.course_id = self.pk
         course_attributes.course_title = self.title
@@ -173,7 +171,7 @@ class Session(models.Model):
         verbose_name=_("Session Price"),
     )
     currency = models.CharField(max_length=3, default="USD", verbose_name=_("Currency"))
-    #  I DIDN'T DO VERBOSE NAME BECAUSE I FIGURED CITY WOULD BE CITY, but do you think I should for translations?
+
     address = models.CharField(
         max_length=200, null=True, blank=True, verbose_name=_("Address")
     )
@@ -184,14 +182,14 @@ class Session(models.Model):
     zip_code = models.CharField(
         max_length=5, null=True, blank=True, verbose_name=_("Postal Code")
     )
-    lat = DecimalField(
+    lat = models.DecimalField(
         max_digits=9,
         decimal_places=6,
         null=True,
         blank=True,
         verbose_name=_("Latitude"),
-    )    
-    long = DecimalField(
+    )
+    long = models.DecimalField(
         max_digits=9,
         decimal_places=6,
         null=True,
@@ -242,7 +240,8 @@ class Seat(models.Model):
         verbose_name=_("Status"),
     )
 
-@receiver(pre_save, sender=Course)
-def create_course_attributes_object(sender, course, created, **kwargs):
-    if created:
-        course.create_course_attributes_object()
+
+@receiver(models.signals.post_save, sender=Course)
+def create_course_attributes_object(sender, instance, **kwargs):
+    """ After a course is saved we create the course attributes in Mongo automatically"""
+    instance.create_course_attributes_object()
