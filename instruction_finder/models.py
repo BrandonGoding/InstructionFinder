@@ -36,7 +36,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         _("email address"),
         unique=True,
-        help_text=_("Please enter a valid email address, this will also be your user name."),
+        help_text=_(
+            "Please enter a valid email address, this will also be your user name."),
     )
     first_name = models.CharField(
         _("first name"),
@@ -166,12 +167,14 @@ class Instructor(Profile):
         :return:
         String full_name
         """
-        return self.full_name
+        if self.title:
+            return f"{self.title} {self.full_name}"
+        return f"Instructor {self.full_name}"
 
     @property
     def average_rating(self):
         """
-        Return the average rateing calculated by total review score / count of reviews
+        Return the average rating calculated by total review score / count of reviews
         :return:
         int:
         """
@@ -193,7 +196,8 @@ class Instructor(Profile):
         :return:
         List:
         """
-        return Course.objects.filter(user=self.user.pk)  #TODO: NEED TO ALSO FILTER BY DATE
+        return Course.objects.filter(
+            user=self.user.pk)  # TODO: NEED TO ALSO FILTER BY DATE
 
 
 class Student(Profile):
@@ -204,7 +208,8 @@ class Student(Profile):
         :return:
         String full_name
         """
-        return self.full_name
+        return f"Student {self.full_name}"
+
 
 
 class Course(models.Model):
