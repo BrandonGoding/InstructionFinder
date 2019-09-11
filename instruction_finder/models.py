@@ -211,13 +211,12 @@ class Student(Profile):
         return f"Student {self.full_name}"
 
 
-
 class Course(models.Model):
     """
     Course Model
     """
     instructor = models.ForeignKey(
-        User,
+        Instructor,
         on_delete=models.PROTECT,
         verbose_name=_("Course Instructor"),
         related_name="courses",
@@ -235,7 +234,7 @@ class Course(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # PK to the CourseAttributes Document
-    course_attributes_id = models.CharField(max_length=100, unique=True)
+    course_attributes_id = models.CharField(max_length=100, unique=True, default=None, null=True, blank=True)
 
     def __str__(self):
         """
@@ -256,6 +255,20 @@ class Course(models.Model):
         course_attributes.course_description = self.description
         course_attributes.is_active = self.is_active
         course_attributes.save()
+        return course_attributes
+
+
+    def get_course_attributes_object(self):
+        """
+        Return the course_attributes object
+        :return: CourseAttributes()
+        """
+        try:
+            return CourseAttributes.objects.get(id=self.course_attributes_id)
+        except KeyError:
+            raise KeyError('Attribute object not found')
+
+        return None
 
     @property
     def upcoming(self):
@@ -358,8 +371,11 @@ class Seat(models.Model):
 
 @receiver(models.signals.post_save, sender=Course)
 def create_course_attributes_object(sender, instance, **kwargs):
+
     """
     After a course is saved we create the course attributes
     in Mongo automatically
     """
-    instance.create_course_attributes_object()
+    course_attributes = instance.create_course_attributes_object()
+    instance.course_attributes_id = course_attributes.id
+

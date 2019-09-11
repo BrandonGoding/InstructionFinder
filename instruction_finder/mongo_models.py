@@ -80,3 +80,4 @@ class CourseAttributes(mongoengine.Document):
     is_active = mongoengine.BooleanField(required=True, default=False)
     course_description = mongoengine.StringField(required=True)
     tags = mongoengine.EmbeddedDocumentListField(Tag)
+    custom = mongoengine.DictField()
