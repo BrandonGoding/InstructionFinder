@@ -15,12 +15,15 @@ Todo:
     * COURSE RATING MODELS
 
 """
+import statistics
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.core.mail import send_mail
 from django.db import models
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 from localflavor.us.models import USStateField
 from mongoengine import *
 from instruction_finder.helpers import RandomFileName
@@ -28,16 +31,19 @@ from instruction_finder.managers import UserManager
 from instruction_finder.mongo_models import CourseAttributes
 
 
+
 class User(AbstractBaseUser, PermissionsMixin):
     """
     Custom User Model
     This is how we are going to customize fields in the default User Model
     """
+
     email = models.EmailField(
         _("email address"),
         unique=True,
         help_text=_(
-            "Please enter a valid email address, this will also be your user name."),
+            "Please enter a valid email address, this will also be your user name."
+        ),
     )
     first_name = models.CharField(
         _("first name"),
@@ -51,14 +57,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         help_text=_("Please enter your family name."),
     )
-    date_joined = models.DateTimeField(
-        _("date joined"),
-        auto_now_add=True,
-    )
-    is_staff = models.BooleanField(
-        _("staff status"),
-        default=False,
-    )
+    date_joined = models.DateTimeField(_("date joined"), auto_now_add=True)
+    is_staff = models.BooleanField(_("staff status"), default=False)
     is_active = models.BooleanField(
         _("active"),
         default=True,
@@ -131,6 +131,7 @@ class Profile(models.Model):
     User Profile Model
     To store additional user fields
     """
+
     user = models.OneToOneField(
         to=User, on_delete=models.CASCADE, related_name="user_profile"
     )
@@ -158,7 +159,7 @@ class Instructor(Profile):
         null=True,
         blank=True,
         verbose_name="Instructor Title",
-        help_text="Enter your professional title here, examples Coach, Professor, Master"
+        help_text="Enter your professional title here, examples Coach, Professor, Master",
     )
 
     def __str__(self):
@@ -173,22 +174,20 @@ class Instructor(Profile):
 
     @property
     def average_rating(self):
-        """
-        Return the average rating calculated by total review score / count of reviews
-        :return:
-        int:
-        """
-        # TODO: FINISH THIS METHOD
-        pass
+        ratings = self.instructor_ratings.all()
+        numbers = []
+        for rating in ratings:
+            numbers.append(rating.rating)
+        return statistics.mean(numbers)
 
-    @property
-    def courses_taught(self):
-        """
-        Returns the total number of courses taught on this app
-        :return:
-        int:
-        """
-        pass  # TODO: FINISH THIS METHOD
+    # @property
+    # def courses_taught(self):
+    #     """
+    #     Returns the total number of courses taught on this app
+    #     :return:
+    #     int:
+    #     """
+    #     pass
 
     def get_upcoming_courses(self):
         """
@@ -197,11 +196,11 @@ class Instructor(Profile):
         List:
         """
         return Course.objects.filter(
-            user=self.user.pk)  # TODO: NEED TO ALSO FILTER BY DATE
+            user=self.user.pk
+        )
 
 
 class Student(Profile):
-
     def __str__(self):
         """
         Returns the full name of the Student
@@ -215,6 +214,7 @@ class Course(models.Model):
     """
     Course Model
     """
+
     instructor = models.ForeignKey(
         Instructor,
         on_delete=models.PROTECT,
@@ -234,7 +234,9 @@ class Course(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # PK to the CourseAttributes Document
-    course_attributes_id = models.CharField(max_length=100, unique=True, default=None, null=True, blank=True)
+    course_attributes_id = models.CharField(
+        max_length=100, unique=True, default=None, null=True, blank=True
+    )
 
     def __str__(self):
         """
@@ -257,7 +259,6 @@ class Course(models.Model):
         course_attributes.save()
         return course_attributes
 
-
     def get_course_attributes_object(self):
         """
         Return the course_attributes object
@@ -266,7 +267,7 @@ class Course(models.Model):
         try:
             return CourseAttributes.objects.get(id=self.course_attributes_id)
         except KeyError:
-            raise KeyError('Attribute object not found')
+            raise KeyError("Attribute object not found")
 
         return None
 
@@ -369,6 +370,88 @@ class Seat(models.Model):
     )
 
 
+class InstructorRating(models.Model):
+    instructor = models.ForeignKey(
+        to=Instructor,
+        null=False,
+        blank=False,
+        on_delete=models.CASCADE,
+        related_name="instructor_ratings",
+    )
+    student = models.ForeignKey(
+        to=Student,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="instructor_ratings",
+    )
+    seat = models.ForeignKey(
+        to=Seat,
+        null=False,
+        blank=False,
+        on_delete=models.CASCADE,
+        related_name="instructor_ratings",
+    )
+    rating = models.IntegerField(
+        validators=[MaxValueValidator(5), MinValueValidator(1)]
+    )
+    narrative = models.TextField(null=True, blank=True)
+
+    def __meta__(self):
+        unique_together = ("instructor", "student", "seat")
+
+    @staticmethod
+    def get_average_rating_by_instructor(instructor):
+        ratings = InstructorRating.objects.filter(instructor=instructor)
+        numbers = []
+        for rating in ratings:
+            numbers.append(rating.rating)
+        return statistics.mean(numbers)
+
+
+class CourseRating(models.Model):
+    student = models.ForeignKey(
+        to=Student,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="course_ratings",
+    )
+    course = models.ForeignKey(
+        to=Course,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="course_ratings",
+    )
+    seat = models.ForeignKey(
+        to=Seat,
+        null=False,
+        blank=False,
+        on_delete=models.CASCADE,
+        related_name="course_ratings",
+    )
+    rating = models.IntegerField(
+        validators=[MaxValueValidator(5), MinValueValidator(1)]
+    )
+    narrative = models.TextField(null=True, blank=True)
+
+    def __meta__(self):
+        unique_together = ("student", "course", "seat")
+
+    @staticmethod
+    def get_average_rating_by_course(course):
+        """
+        :param course:
+        :return:
+        """
+        ratings = CourseRating.objects.filter(course=course)
+        numbers = []
+        for rating in ratings:
+            numbers.append(rating.rating)
+        return statistics.mean(numbers)
+
+
 @receiver(models.signals.post_save, sender=Course)
 def create_course_attributes_object(sender, instance, **kwargs):
 
@@ -378,4 +461,3 @@ def create_course_attributes_object(sender, instance, **kwargs):
     """
     course_attributes = instance.create_course_attributes_object()
     instance.course_attributes_id = course_attributes.id
-

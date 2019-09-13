@@ -13,9 +13,8 @@ class UserCreationForm(forms.ModelForm):
     to match the new custom User Model
     https://docs.djangoproject.com/en/2.2/topics/auth/customizing/#custom-users-and-the-built-in-auth-forms
     """
-    error_messages = {
-        'password_mismatch': _("The two password fields didn't match."),
-    }
+
+    error_messages = {"password_mismatch": _("The two password fields didn't match.")}
     password1 = forms.CharField(
         label=_("Password"),
         strip=False,
@@ -31,7 +30,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('email', )
+        fields = ("email",)
 
     def clean_password2(self):
         # Check that the two password entries match
@@ -56,18 +55,19 @@ class UserChangeForm(forms.ModelForm):
     to match the new custom User Model
     https://docs.djangoproject.com/en/2.2/topics/auth/customizing/#custom-users-and-the-built-in-auth-forms
     """
+
     password = ReadOnlyPasswordHashField(
         label=_("Password"),
         help_text=_(
             "Raw passwords are not stored, so there is no way to see this "
             "user's password, but you can change the password using "
-            "<a href=\"{}\">this form</a>."
+            '<a href="{}">this form</a>.'
         ),
     )
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = "__all__"
 
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
@@ -89,27 +89,33 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('email', 'first_name', 'last_name', 'is_staff')
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
+    list_display = ("email", "first_name", "last_name", "is_staff")
+    list_filter = ("is_staff", "is_superuser", "is_active", "groups")
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name')}),
-        (_('Permissions'), {
-            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
-        })
+        (None, {"fields": ("email", "password")}),
+        (_("Personal info"), {"fields": ("first_name", "last_name")}),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
     )
 
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2')}
-         ),
+        (None, {"classes": ("wide",), "fields": ("email", "password1", "password2")}),
     )
 
-    search_fields = ('first_name', 'last_name', 'email')
-    ordering = ('email',)
+    search_fields = ("first_name", "last_name", "email")
+    ordering = ("email",)
     filter_horizontal = ()
 
 

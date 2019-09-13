@@ -1,4 +1,5 @@
 from django.views import View
+
 # from instruction_finder.mongo_models import Session, Seat
 import random
 import datetime
@@ -10,7 +11,6 @@ from django.http import JsonResponse
 
 
 class SessionViewSet(View):
-
     def get(self, request, *args, **kwargs):
         # Get auth Class
         auth = JSONWebTokenAuthentication()
@@ -21,15 +21,11 @@ class SessionViewSet(View):
             print(authentication)
 
         except AuthenticationFailed as e:
-            return JsonResponse({
-                "error": str(e)
-            }, status=401)
+            return JsonResponse({"error": str(e)}, status=401)
 
         # I token was not found
         if authentication is None:
-            return JsonResponse({
-                "error": "Token has not been provided"
-            }, status=401)
+            return JsonResponse({"error": "Token has not been provided"}, status=401)
 
         # Serialize objects
         # sessions = Session.objects.all().order_by('-session_date')[:20]

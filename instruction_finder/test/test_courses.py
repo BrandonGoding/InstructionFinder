@@ -18,18 +18,16 @@ class TestCourse(TestCase):
         # Connect with mongo mock for testing
         self.conn = mongoengine.connect("testdb", host="mongomock://localhost")
 
-
         # Instructor
         self.user = mommy.make(
             User, email="jacob@example.com", first_name="Jacob", last_name="Lee"
         )
         self.instructor = mommy.make(Instructor, user=self.user, title="Professor")
 
-
         # Course
-        self.course = mommy.make(Course, instructor=self.instructor,
-                                 title="Tennis Lessons")
-
+        self.course = mommy.make(
+            Course, instructor=self.instructor, title="Tennis Lessons"
+        )
 
     def test_course_creation(self):
         # Test UserProfile Model creation
@@ -53,7 +51,6 @@ class TestCourse(TestCase):
         attrs.save()
 
         self.assertTrue(self.course.get_course_attributes_object().custom["a"], "123")
-
 
     def tearDown(self):
         # Drop test DB and close connection
