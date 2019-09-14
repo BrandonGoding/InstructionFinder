@@ -31,7 +31,6 @@ from instruction_finder.managers import UserManager
 from instruction_finder.mongo_models import CourseAttributes
 
 
-
 class User(AbstractBaseUser, PermissionsMixin):
     """
     Custom User Model
@@ -92,26 +91,27 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Meta
         """
+
         verbose_name = _("user")
         verbose_name_plural = _("users")
 
     @property
-    def full_name(self):
+    def full_name(object: self) -> str:
         """
         Returns the full name of the user
         :return:
         String: self.first_name self.last_name
         """
-        return f"{self.first_name} {self.last_name}".strip()
+        return str(f"{self.first_name} {self.last_name}".strip())
 
     @property
-    def short_name(self):
+    def short_name(object: self) -> str:
         """
         Returns the short display name for the rider ie The First Name
         :return:
         String: Returns the short name for the user.
         """
-        return self.first_name
+        return str(self.first_name)
 
     def email_user(self, subject, message, from_email=None, **kwargs):
         """
@@ -132,13 +132,13 @@ class Profile(models.Model):
     To store additional user fields
     """
 
-    # The Profile file Model has a one to one relation with User 
+    # The Profile file Model has a one to one relation with User
     user = models.OneToOneField(
         to=User,
         on_delete=models.CASCADE,
         related_name="user_profile",
         verbose_name=_("Profile's User"),
-        help_text=_("Please select this profiles user.")
+        help_text=_("Please select this profiles user."),
     )
     # We upload an avatar image for display in profiles, and comments
     avatar = models.ImageField(
@@ -154,10 +154,10 @@ class Profile(models.Model):
         null=False,
         blank=False,
         verbose_name=_("User's Date of Birth"),
-        help_text=_("Please enter your date of birth")
+        help_text=_("Please enter your date of birth"),
     )
 
-    def __str__(object: self) => str:
+    def __str__(object: self) -> str:
         """
         Returns a display title for the user profile
         :return: str: Profile of {self.user}
@@ -165,7 +165,7 @@ class Profile(models.Model):
         return str(f"Profile of {self.user}")
 
     @property
-    def full_name(object: self) => str:
+    def full_name(object: self) -> str:
         """
         Returns the full name of the user
         :return: str: self.user.full_name
@@ -173,17 +173,19 @@ class Profile(models.Model):
         return str(self.user.full_name)
 
     @property
-    def age(object: self) => int:
+    def age(object: self) -> int:
         """
         Returns the users age for display as an integer
         :return: int: CustomCalculations.calculate_age(self.date_of_birth)
         """
         return int(CustomCalculations.calculate_age(self.date_of_birth))
 
+
 class Instructor(Profile):
     """
     The Instructor Class Extends Profile with Instructor Specific Fields
     """
+
     title = models.CharField(
         max_length=25,
         null=True,
@@ -192,18 +194,18 @@ class Instructor(Profile):
         help_text="Enter your professional title here, examples Coach, Professor, Master",
     )
 
-    def __str__(object: self) => str:
+    def __str__(object: self) -> str:
         """
         Returns the full name of the Instructor
         :return:
         String full_name
         """
         if self.title:
-            return f"{self.title} {self.full_name}"
-        return f"Instructor {self.full_name}"
+            return str(f"{self.title} {self.full_name}")
+        return str(f"Instructor {self.full_name}")
 
     @property
-    def average_rating(object: self) => int:
+    def average_rating(object: self) -> int:
         """
         Returns the average rating for the instructor
         :return: int: round(statistics.mean(numbers), 0)
@@ -223,41 +225,39 @@ class Instructor(Profile):
     #     """
     #     pass
 
-    def get_upcoming_courses(object: self) => list:
+    def get_upcoming_courses(object: self) -> list:
         """
         Returns a list of upcoming class objects
         :return:
         List:
         """
-        return Course.objects.filter(
-            user=self.user.pk
-        )
+        return Course.objects.filter(user=self.user.pk)
 
 
 class Student(Profile):
-
-    def __str__(object: self) => str:
+    def __str__(object: self) -> str:
         """
         Returns the full name of the Student
         :return:
         String full_name
         """
-        return f"Student {self.full_name}"
+        return str(f"Student {self.full_name}")
 
     @property
-    def courses_taken(object: self) => int:
+    def courses_taken(object: self) -> int:
         """
         Returns a count of the students completed courses
         :return: int: self.seats.filter(status='completed').count()
         """
-        return int(self.seats.filter(status='completed').count())
+        return int(self.seats.filter(status="completed").count())
 
-    def get_course_reviews(object: self) => list:
+    def get_course_reviews(object: self) -> list:
         """
         Returns a list of the students course ratings
         :return: list: self.course_ratings
         """
         return self.course_ratings
+
 
 class Course(models.Model):
     """
