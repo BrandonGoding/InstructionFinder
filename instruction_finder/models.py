@@ -132,6 +132,7 @@ class Profile(models.Model):
     To store additional user fields
     """
 
+    # The Profile file Model has a one to one relation with User 
     user = models.OneToOneField(
         to=User,
         on_delete=models.CASCADE,
@@ -139,6 +140,7 @@ class Profile(models.Model):
         verbose_name=_("Profile's User"),
         help_text=_("Please select this profiles user.")
     )
+    # We upload an avatar image for display in profiles, and comments
     avatar = models.ImageField(
         null=True,
         blank=True,
@@ -146,34 +148,42 @@ class Profile(models.Model):
         verbose_name=_("User's Avatar"),
         help_text=_("Please select a image to use as your Avatar"),
     )
+    # Used for administrative purposes and in some calculations
+    # Required to make sure user can use site
     date_of_birth = models.DateField(
-        null=True,
-        blank=True,
+        null=False,
+        blank=False,
         verbose_name=_("User's Date of Birth"),
         help_text=_("Please enter your date of birth")
     )
 
-    def __str__(self):
+    def __str__(object: self) => str:
         """
-        Returns the email address of the profiles User
-        :return:
-        String: self.user
+        Returns a display title for the user profile
+        :return: str: Profile of {self.user}
         """
-        return f"Profile of {self.user}"
+        return str(f"Profile of {self.user}")
 
     @property
-    def full_name(self):
+    def full_name(object: self) => str:
         """
         Returns the full name of the user
         :return: str: self.user.full_name
         """
-        return self.user.full_name
+        return str(self.user.full_name)
 
     @property
-    def age(self):
-        return CustomCalculations.calculate_age(self.date_of_birth)
+    def age(object: self) => int:
+        """
+        Returns the users age for display as an integer
+        :return: int: CustomCalculations.calculate_age(self.date_of_birth)
+        """
+        return int(CustomCalculations.calculate_age(self.date_of_birth))
 
 class Instructor(Profile):
+    """
+    The Instructor Class Extends Profile with Instructor Specific Fields
+    """
     title = models.CharField(
         max_length=25,
         null=True,
@@ -182,7 +192,7 @@ class Instructor(Profile):
         help_text="Enter your professional title here, examples Coach, Professor, Master",
     )
 
-    def __str__(self):
+    def __str__(object: self) => str:
         """
         Returns the full name of the Instructor
         :return:
@@ -193,12 +203,16 @@ class Instructor(Profile):
         return f"Instructor {self.full_name}"
 
     @property
-    def average_rating(self):
+    def average_rating(object: self) => int:
+        """
+        Returns the average rating for the instructor
+        :return: int: round(statistics.mean(numbers), 0)
+        """
         ratings = self.instructor_ratings.all()
         numbers = []
         for rating in ratings:
             numbers.append(rating.rating)
-        return statistics.mean(numbers)
+        return int(round(statistics.mean(numbers), 0))
 
     # @property
     # def courses_taught(self):
@@ -209,7 +223,7 @@ class Instructor(Profile):
     #     """
     #     pass
 
-    def get_upcoming_courses(self):
+    def get_upcoming_courses(object: self) => list:
         """
         Returns a list of upcoming class objects
         :return:
@@ -221,7 +235,8 @@ class Instructor(Profile):
 
 
 class Student(Profile):
-    def __str__(self):
+
+    def __str__(object: self) => str:
         """
         Returns the full name of the Student
         :return:
@@ -229,6 +244,20 @@ class Student(Profile):
         """
         return f"Student {self.full_name}"
 
+    @property
+    def courses_taken(object: self) => int:
+        """
+        Returns a count of the students completed courses
+        :return: int: self.seats.filter(status='completed').count()
+        """
+        return int(self.seats.filter(status='completed').count())
+
+    def get_course_reviews(object: self) => list:
+        """
+        Returns a list of the students course ratings
+        :return: list: self.course_ratings
+        """
+        return self.course_ratings
 
 class Course(models.Model):
     """
