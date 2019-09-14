@@ -26,7 +26,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 from localflavor.us.models import USStateField
 from mongoengine import *
-from instruction_finder.helpers import RandomFileName
+from instruction_finder.helpers import RandomFileName, CustomCalculations
 from instruction_finder.managers import UserManager
 from instruction_finder.mongo_models import CourseAttributes
 
@@ -82,11 +82,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         """
-        Returns the users email address
+        Returns the users full Name 
         :return:
         String: self.email
         """
-        return self.email
+        return self.full_name
 
     class Meta:
         """
@@ -133,12 +133,25 @@ class Profile(models.Model):
     """
 
     user = models.OneToOneField(
-        to=User, on_delete=models.CASCADE, related_name="user_profile"
+        to=User,
+        on_delete=models.CASCADE,
+        related_name="user_profile",
+        verbose_name=_("Profile's User"),
+        help_text=_("Please select this profiles user.")
     )
     avatar = models.ImageField(
-        null=True, blank=True, upload_to=RandomFileName("user_profile")
+        null=True,
+        blank=True,
+        upload_to=RandomFileName("user_profile"),
+        verbose_name=_("User's Avatar"),
+        help_text=_("Please select a image to use as your Avatar"),
     )
-    date_of_birth = models.DateField(null=True, blank=True)
+    date_of_birth = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name=_("User's Date of Birth"),
+        help_text=_("Please enter your date of birth")
+    )
 
     def __str__(self):
         """
@@ -150,8 +163,15 @@ class Profile(models.Model):
 
     @property
     def full_name(self):
+        """
+        Returns the full name of the user
+        :return: str: self.user.full_name
+        """
         return self.user.full_name
 
+    @property
+    def age(self):
+        return CustomCalculations.calculate_age(self.date_of_birth)
 
 class Instructor(Profile):
     title = models.CharField(
