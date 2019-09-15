@@ -320,7 +320,6 @@ class Session(models.Model):
     """
     Session Model
     """
-
     course = models.ForeignKey(
         Course,
         on_delete=models.PROTECT,

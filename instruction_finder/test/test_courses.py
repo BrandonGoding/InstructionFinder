@@ -54,7 +54,7 @@ class TestCourse(TestCase):
         attributes = self.course.get_course_attributes_object()
         self.assertTrue(attributes.custom, ["123"])
 
-        def tearDown(self):
-            # Drop test DB and close connection
-            self.conn.drop_database("testdb")
-            self.conn.close()
+    def tearDown(self):
+        # Drop test DB and close connection
+        self.conn.drop_database("testdb")
+        self.conn.close()

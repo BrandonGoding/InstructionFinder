@@ -5,14 +5,6 @@ from django.http import JsonResponse
 from instruction_finder.models import Course
 
 
-class SessionViewSet(AuthenticationMixin, View):
-    def get(self, request, *args, **kwargs):
-        # Serialize objects
-        # sessions = Session.objects.all().order_by('-session_date')[:20]
-        # return JsonResponse(json.loads(sessions.to_json()), status=200, safe=False)
-        return JsonResponse({"ok": "ok"}, status=200, safe=False)
-
-
 class CourseAttributesFormView(AuthenticationMixin, View):
 
     def get(self, request, *args, **kwargs):
