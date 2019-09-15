@@ -79,13 +79,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
-    def __str__(self):
+    def __str__(self: object) -> str:
         """
         Returns the users full Name 
         :return:
         String: self.email
         """
-        return self.full_name
+        return str(self.full_name)
 
     class Meta:
         """
@@ -96,7 +96,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = _("users")
 
     @property
-    def full_name(object: self) -> str:
+    def full_name(self: object) -> str:
         """
         Returns the full name of the user
         :return:
@@ -105,7 +105,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return str(f"{self.first_name} {self.last_name}".strip())
 
     @property
-    def short_name(object: self) -> str:
+    def short_name(self: object) -> str:
         """
         Returns the short display name for the rider ie The First Name
         :return:
@@ -157,7 +157,7 @@ class Profile(models.Model):
         help_text=_("Please enter your date of birth"),
     )
 
-    def __str__(object: self) -> str:
+    def __str__(self: object) -> str:
         """
         Returns a display title for the user profile
         :return: str: Profile of {self.user}
@@ -165,7 +165,7 @@ class Profile(models.Model):
         return str(f"Profile of {self.user}")
 
     @property
-    def full_name(object: self) -> str:
+    def full_name(self: object) -> str:
         """
         Returns the full name of the user
         :return: str: self.user.full_name
@@ -173,7 +173,7 @@ class Profile(models.Model):
         return str(self.user.full_name)
 
     @property
-    def age(object: self) -> int:
+    def age(self: object) -> int:
         """
         Returns the users age for display as an integer
         :return: int: CustomCalculations.calculate_age(self.date_of_birth)
@@ -194,7 +194,7 @@ class Instructor(Profile):
         help_text="Enter your professional title here, examples Coach, Professor, Master",
     )
 
-    def __str__(object: self) -> str:
+    def __str__(self: object) -> str:
         """
         Returns the full name of the Instructor
         :return:
@@ -205,7 +205,7 @@ class Instructor(Profile):
         return str(f"Instructor {self.full_name}")
 
     @property
-    def average_rating(object: self) -> int:
+    def average_rating(self: object) -> int:
         """
         Returns the average rating for the instructor
         :return: int: round(statistics.mean(numbers), 0)
@@ -217,7 +217,7 @@ class Instructor(Profile):
         return int(round(statistics.mean(numbers), 0))
 
     # @property
-    # def courses_taught(self):
+    # def courses_taught(self: object):
     #     """
     #     Returns the total number of courses taught on this app
     #     :return:
@@ -225,7 +225,7 @@ class Instructor(Profile):
     #     """
     #     pass
 
-    def get_upcoming_courses(object: self) -> list:
+    def get_upcoming_courses(self: object) -> list:
         """
         Returns a list of upcoming class objects
         :return:
@@ -235,7 +235,7 @@ class Instructor(Profile):
 
 
 class Student(Profile):
-    def __str__(object: self) -> str:
+    def __str__(self: object) -> str:
         """
         Returns the full name of the Student
         :return:
@@ -244,14 +244,14 @@ class Student(Profile):
         return str(f"Student {self.full_name}")
 
     @property
-    def courses_taken(object: self) -> int:
+    def courses_taken(self: object) -> int:
         """
         Returns a count of the students completed courses
         :return: int: self.seats.filter(status='completed').count()
         """
         return int(self.seats.filter(status="completed").count())
 
-    def get_course_reviews(object: self) -> list:
+    def get_course_reviews(self: object) -> list:
         """
         Returns a list of the students course ratings
         :return: list: self.course_ratings
@@ -287,15 +287,15 @@ class Course(models.Model):
         max_length=100, unique=True, default=None, null=True, blank=True
     )
 
-    def __str__(self):
+    def __str__(self: object) -> str:
         """
         Returns the title of the course
         :return:
         String: title
         """
-        return self.title
+        return str(self.title)
 
-    def create_course_attributes_object(self):
+    def create_course_attributes_object(self: object):
         """
         Create course attributes in mongo DB (Will be used in the query)
         :return: None
@@ -308,7 +308,7 @@ class Course(models.Model):
         course_attributes.save()
         return course_attributes
 
-    def get_course_attributes_object(self):
+    def get_course_attributes_object(self: object):
         """
         Return the course_attributes object
         :return: CourseAttributes()
@@ -321,7 +321,7 @@ class Course(models.Model):
         return None
 
     @property
-    def upcoming(self):
+    def upcoming(self: object):
         """
         Returns True if course has availability in upcoming session dates.
         :return:
@@ -446,7 +446,7 @@ class InstructorRating(models.Model):
     )
     narrative = models.TextField(null=True, blank=True)
 
-    def __meta__(self):
+    def __meta__(self: object):
         unique_together = ("instructor", "student", "seat")
 
     @staticmethod
@@ -485,7 +485,7 @@ class CourseRating(models.Model):
     )
     narrative = models.TextField(null=True, blank=True)
 
-    def __meta__(self):
+    def __meta__(self: object):
         unique_together = ("student", "course", "seat")
 
     @staticmethod
