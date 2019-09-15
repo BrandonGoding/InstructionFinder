@@ -23,6 +23,9 @@ urlpatterns = [
     path('courses/<int:pk>/', CourseViewSet.as_view({'get': 'retrieve'})),
 
 
+    path('courses/<int:pk>/attributes', CourseAttributesFormView.as_view()),
+
+
     # Mongo Models
     path('sessions/', SessionViewSet.as_view(), name='sessions_list')
 ]

@@ -2,6 +2,8 @@
 from django.test import TestCase
 from model_mommy import mommy
 import mongoengine
+
+from instructionApp.settings import MONGODB_PORT
 from instruction_finder.models import Course, User, Instructor
 from instruction_finder.mongo_models import CourseAttributes
 
@@ -16,7 +18,8 @@ class TestCourse(TestCase):
         mongoengine.connection.disconnect()
 
         # Connect with mongo mock for testing
-        self.conn = mongoengine.connect("testdb", host="mongomock://localhost")
+        self.conn = mongoengine.connect("testdb", host="mongomock://localhost",
+                                        port=MONGODB_PORT)
 
         # Instructor
         self.user = mommy.make(
@@ -46,13 +49,12 @@ class TestCourse(TestCase):
         self.assertTrue(attrs.course_id, self.course.id)
         self.assertTrue(attrs.course_title, "Tennis Lessons")
 
-        # Saving Custom Attributes
-        attrs.custom = {"a": 213}
-        attrs.save()
+        CourseAttributes.objects.get(id=self.course.course_attributes_id).update(custom=["123"])
 
-        self.assertTrue(self.course.get_course_attributes_object().custom["a"], "123")
+        attributes = self.course.get_course_attributes_object()
+        self.assertTrue(attributes.custom, ["123"])
 
-    def tearDown(self):
-        # Drop test DB and close connection
-        self.conn.drop_database("testdb")
-        self.conn.close()
+        def tearDown(self):
+            # Drop test DB and close connection
+            self.conn.drop_database("testdb")
+            self.conn.close()

@@ -81,7 +81,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self: object) -> str:
         """
-        Returns the users full Name 
+        Returns the users full Name
         :return:
         String: self.email
         """
@@ -295,19 +295,6 @@ class Course(models.Model):
         """
         return str(self.title)
 
-    def create_course_attributes_object(self: object):
-        """
-        Create course attributes in mongo DB (Will be used in the query)
-        :return: None
-        """
-        course_attributes = CourseAttributes()
-        course_attributes.course_id = self.pk
-        course_attributes.course_title = self.title
-        course_attributes.course_description = self.description
-        course_attributes.is_active = self.is_active
-        course_attributes.save()
-        return course_attributes
-
     def get_course_attributes_object(self: object):
         """
         Return the course_attributes object
@@ -315,7 +302,7 @@ class Course(models.Model):
         """
         try:
             return CourseAttributes.objects.get(id=self.course_attributes_id)
-        except KeyError:
+        except (KeyError, ValidationError):
             raise KeyError("Attribute object not found")
 
         return None
@@ -328,7 +315,6 @@ class Course(models.Model):
         bool
         """
         pass
-
 
 class Session(models.Model):
     """
@@ -505,8 +491,18 @@ class CourseRating(models.Model):
 def create_course_attributes_object(sender, instance, **kwargs):
 
     """
-    After a course is saved we create the course attributes
-    in Mongo automatically
+    After a course is saved we link to course attributes
+    in Mongo
     """
-    course_attributes = instance.create_course_attributes_object()
-    instance.course_attributes_id = course_attributes.id
+
+    if instance.course_attributes_id is None:
+
+        course_attributes = CourseAttributes()
+        course_attributes.course_title = instance.title
+        course_attributes.course_description = instance.description
+        course_attributes.is_active = instance.is_active
+        course_attributes.course_id = instance.id
+        course_attributes.save()
+
+        instance.course_attributes_id = str(course_attributes.id)
+        instance.save()

@@ -10,8 +10,13 @@ class InstructorSerializer(ModelSerializer):
 
 
 class CourseSerializer(ModelSerializer):
-    instructor = InstructorSerializer(many=False)
+    #instructor = InstructorSerializer(many=False)
 
     class Meta:
         model = Course
         fields = ("id", "instructor", "title", "description", "is_active")
+
+    def create(self, validated_data):
+        instance = Course.objects.create(**validated_data)
+        return instance
+
