@@ -7,6 +7,10 @@ services:
       - "54320:5432"
     volumes:
       - my_dbdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=instructorapp
   mongo:
     image: mongo
     restart: always
@@ -15,7 +19,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
       MONGO_INITDB_DATABASE: example
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - db-data:/data/db
       - mongo-config:/data/configdb

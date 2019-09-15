@@ -92,7 +92,12 @@ DATABASES = {
 MONGODB_NAME = config('MONGODB_NAME')
 MONGODB_USER = config('MONGODB_USER')
 MONGODB_PWD = config('MONGODB_PWD')
+MONGODB_HOST = config('MONGODB_HOST')
+MONGODB_PORT = int(config('MONGODB_PORT'))
+
 mongoengine.connect(MONGODB_NAME,
+                    host=MONGODB_HOST,
+                    port=MONGODB_PORT,
                     username=MONGODB_USER,
                     password=MONGODB_PWD,
                     authentication_source='admin')
@@ -142,8 +147,8 @@ REST_FRAMEWORK = {
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=259200),  # 3 days
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(seconds=259200),  # 3 days
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer', # Bearer token
-    'JWT_ALLOW_REFRESH': True, # Allow Refresh
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',  # Bearer token
+    'JWT_ALLOW_REFRESH': True,  # Allow Refresh
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
 }
