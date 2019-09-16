@@ -282,10 +282,6 @@ class Course(models.Model):
     is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # PK to the CourseAttributes Document
-    course_attributes_id = models.CharField(
-        max_length=100, unique=True, default=None, null=True, blank=True
-    )
 
     def __str__(self: object) -> str:
         """
@@ -301,11 +297,9 @@ class Course(models.Model):
         :return: CourseAttributes()
         """
         try:
-            return CourseAttributes.objects.get(id=self.course_attributes_id)
+            return CourseAttributes.objects.get(course_id=self.pk)
         except (KeyError, ValidationError):
             raise KeyError("Attribute object not found")
-
-        return None
 
     @property
     def upcoming(self: object):
@@ -315,6 +309,7 @@ class Course(models.Model):
         bool
         """
         pass
+
 
 class Session(models.Model):
     """
@@ -362,6 +357,45 @@ class Session(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class SlotGroup(models.Model):
+    """
+    Slot Group Model
+    """
+    name = models.CharField(
+        max_length=200, verbose_name=_("Slot Group"), null=False, blank=False
+    )
+    description = models.TextField(
+        verbose_name=_("Slot Group Description"), null=True, blank=True
+    )
+    instructor = models.ForeignKey(
+        Instructor,
+        on_delete=models.CASCADE,
+        verbose_name=_("Slot Groups"),
+        related_name="slot_groups",
+    )
+
+
+class SessionSlot(models.Model):
+    start = models.DateTimeField(verbose_name=_("Slot Start Date"))
+    end = models.DateTimeField(verbose_name=_("Slot End Date"))
+    session = models.ForeignKey(
+        Session,
+        on_delete=models.CASCADE,
+        related_name="session_slots",
+        verbose_name=_("Session Slots"),
+    )
+    slot_group = models.ForeignKey(
+        SlotGroup,
+        on_delete=models.CASCADE,
+        related_name="session_slots",
+        verbose_name=_("Session Slots"),
+    )
+    is_active = models.BooleanField(
+        _("active"),
+        default=False,
+    )
 
 
 class Seat(models.Model):
@@ -488,20 +522,21 @@ class CourseRating(models.Model):
 
 @receiver(models.signals.post_save, sender=Course)
 def create_course_attributes_object(sender, instance, **kwargs):
-
     """
-    After a course is saved we link to course attributes
+    After a course is saved CourseAttributes is created
     in Mongo
     """
 
-    if instance.course_attributes_id is None:
+    if CourseAttributes.objects.filter(course_id=instance.pk).count() > 0:
+        CourseAttributes.objects.get(course_id=instance.pk).update(
+            course_title=instance.title,
+            course_description=instance.description,
+            is_active=instance.is_active,
+        )
 
-        course_attributes = CourseAttributes()
-        course_attributes.course_title = instance.title
-        course_attributes.course_description = instance.description
-        course_attributes.is_active = instance.is_active
-        course_attributes.course_id = instance.id
-        course_attributes.save()
-
-        instance.course_attributes_id = str(course_attributes.id)
-        instance.save()
+    attributes = CourseAttributes()
+    attributes.course_title = instance.title
+    attributes.course_description = instance.description
+    attributes.is_active = instance.is_active
+    attributes.course_id = instance.pk
+    attributes.save()
