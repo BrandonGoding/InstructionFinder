@@ -7,3 +7,4 @@ instruction_finder/migrations/*
 *.pyc
 media
 .vscode
+htmlcov
