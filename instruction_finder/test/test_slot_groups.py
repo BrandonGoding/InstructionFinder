@@ -70,3 +70,42 @@ class TestSlotGroups(TestCase):
 
 
         self.assertEqual(self.session.session_slots.count(), 4)
+
+    def test_is_expired(self):
+        # Create slots
+        slot_morning = mommy.make(
+            SlotGroup, name="Morning", instructor=self.instructor
+        )
+        slot_night = mommy.make(
+            SlotGroup, name="Night", instructor=self.instructor
+        )
+
+        # Add slot hours to the session
+        slot_a = SessionSlot.objects.create(
+            start=datetime.datetime(2920, 7, 1, 8, 0, 0, tzinfo=utc),
+            end=datetime.datetime(2920, 7, 1, 9, 0, 0, tzinfo=utc),
+            session=self.session,
+            slot_group=slot_morning)
+
+        slot_b = SessionSlot.objects.create(
+            start=datetime.datetime(2920, 7, 1, 10, 0, 0, tzinfo=utc),
+            end=datetime.datetime(2920, 7, 1, 11, 0, 0, tzinfo=utc),
+            session=self.session,
+            slot_group=slot_morning)
+
+        slot_c = SessionSlot.objects.create(
+            start=datetime.datetime(2920, 7, 1, 19, 0, 0, tzinfo=utc),
+            end=datetime.datetime(2920, 7, 1, 20, 0, 0, tzinfo=utc),
+            session=self.session,
+            slot_group=slot_night)
+
+        slot_d = SessionSlot.objects.create(
+            start=datetime.datetime(1999, 7, 1, 21, 0, 0, tzinfo=utc),
+            end=datetime.datetime(1999, 7, 1, 22, 0, 0, tzinfo=utc),
+            session=self.session,
+            slot_group=slot_night)
+
+        self.assertTrue(slot_d.is_expired, True)
+        self.assertTrue(slot_c.is_expired, False)
+        self.assertTrue(slot_b.is_expired, False)
+        self.assertTrue(slot_a.is_expired, False)

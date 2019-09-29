@@ -403,6 +403,13 @@ class SessionSlot(models.Model):
         default=False,
     )
 
+    @property
+    def is_expired(self):
+        now_utc = datetime.datetime.utcnow().replace(tzinfo=utc) - self.end
+        if now_utc < 0:
+            return True
+        return False
+
 
 class Seat(models.Model):
     """
