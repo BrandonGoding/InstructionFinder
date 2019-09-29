@@ -15,12 +15,14 @@ Todo:
     * COURSE RATING MODELS
 
 """
+import datetime
 import statistics
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.core.mail import send_mail
 from django.db import models
 from django.dispatch import receiver
+from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 
@@ -302,13 +304,17 @@ class Course(models.Model):
             raise KeyError("Attribute object not found")
 
     @property
-    def upcoming(self: object):
+    def open_sessions(self: object):
         """
-        Returns True if course has availability in upcoming session dates.
-        :return:
-        bool
+        Return the open sessions in the course
+        :return: Session
         """
-        pass
+
+        today = datetime.datetime.today()
+        today = datetime.datetime(
+            today.year, today.month, today.day, 0, 0, 0, tzinfo=utc
+        )
+        return self.sessions.filter(session_slots__end__gte=today)
 
 
 class Session(models.Model):

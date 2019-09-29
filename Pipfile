@@ -58,6 +58,7 @@ model_mommy = "==1.6.0"
 Pillow = "==6.1.0"
 PyJWT = "==1.7.1"
 coverage = "*"
+packaging = "*"
 
 [requires]
 python_version = "3.7"
